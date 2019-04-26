@@ -645,6 +645,13 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@panva/jose@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@panva/jose/-/jose-1.0.0.tgz#17e8a2c7103855e1801d2f47a91e44006bede56d"
+  integrity sha512-+Dz7SOUW2pDBPMLhRhv6xcSygTrjxiW/Umd8JOsIDWdke9//Vdi2MkrhQpQ5K1pPlnGThW2KBz2jUQ+Dy1GXPQ==
+  dependencies:
+    asn1.js "^5.0.1"
+
 "@types/aws-lambda@^8.10.24":
   version "8.10.24"
   resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.24.tgz#89a20cd91957322e26dbfea7f651b970460c8c0c"
@@ -928,6 +935,15 @@ asn1.js@^4.0.0:
   version "4.10.1"
   resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-4.10.1.tgz#b9c2bf5805f1e64aadeed6df3a2bfafb5a73f5a0"
   integrity sha512-p32cOF5q0Zqs9uBiONKYLm6BClCoBCM5O9JfeUSlnQLBTxYdTK+pW+nXflm8UkKd2UYlEbYz5qEi0JuZR9ckSw==
+  dependencies:
+    bn.js "^4.0.0"
+    inherits "^2.0.1"
+    minimalistic-assert "^1.0.0"
+
+asn1.js@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-5.0.1.tgz#7668b56416953f0ce3421adbb3893ace59c96f59"
+  integrity sha512-aO8EaEgbgqq77IEw+1jfx5c9zTbzvkfuRBuZsSsPnTHMkmd5AI4J6OtITLZFa381jReeaQL67J0GBTUu0+ZTVw==
   dependencies:
     bn.js "^4.0.0"
     inherits "^2.0.1"

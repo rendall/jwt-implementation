@@ -1,8 +1,10 @@
 import { Handler, Context, Callback } from "aws-lambda";
+import { JWK } from '@panva/jose'
 import * as dotenv from 'dotenv'
 import * as crypto from 'crypto'
 
 dotenv.config()
+
 
 export const handler: Handler = ( event: Event, context: Context, callback: Callback) => {
   switch (event.httpMethod.toUpperCase()) {
@@ -11,14 +13,19 @@ export const handler: Handler = ( event: Event, context: Context, callback: Call
   }
 };
 
-const decodeAuthHeader = (headerValue) => Buffer.from(headerValue.slice(6), 'base64').toString()
-const parseAuthHeader = (plainText:string, colonIndex?:number):{user:string, password:string} => colonIndex === undefined? parseAuthHeader(plainText, plainText.indexOf(':')) : ({user:plainText.slice(0,colonIndex),password:plainText.slice(colonIndex+1)})
-
-const authenticateUser = (headerValue):boolean => {
-    const plainText = decodeAuthHeader(headerValue)
-    const {user, password} = parseAuthHeader(plainText)
-    return user === 'abc' && hash(password) === process.env.ABC_USER_HASHED_PASSWORD 
+const getSecretTokenKey = () => {
+  const newKey = JWK.generate("EC")
+  console.log('key', newKey)
 }
+
+const decodeAuthHeader = (authHeaderValue) => Buffer.from(authHeaderValue.slice(6), 'base64').toString()
+/** decodeAuthHeader expects a string of the form `Basic someBase64String==` and returns its plaintext decode */
+const parseAuthHeader = (plainText:string, colonIndex?:number):{user:string, password:string} => colonIndex === undefined? parseAuthHeader(plainText, plainText.indexOf(':')) : ({user:plainText.slice(0,colonIndex),password:plainText.slice(colonIndex+1)}) 
+/** parseAuthHeader expects a string of the form `user:password` and returns an object of the form {user, password} */
+const authenticateUser = ({ user, password }): boolean => user === "abc" && hash(password) === process.env.ABC_USER_HASHED_PASSWORD; 
+/** authenticateUser expects an object {user, password} and returns true if the user exists and the password matches the user */
+const isUserAuthentic = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader, authenticateUser].reduce((acc,func) => func(acc), authHeaderValue)
+/** isUserAuthentic expects authHeaderValue and returns true if the user exists and the password matches the user */
 
 const handleGet = (event:Event, callback:Callback) => {
   const AUTHORIZATION = 'Authorization'
@@ -27,8 +34,11 @@ const handleGet = (event:Event, callback:Callback) => {
 
   if (!hasBasicAuth) callback(null, buildResponse( `Unauthenticated`, 401, {...HEADERS, ...AUTHENTICATE_HEADER}))
   else {
-    const isAuthentic = authenticateUser(getHeaderValue(event.headers, AUTHORIZATION) )
-    if (isAuthentic) callback(null, buildResponse('OK'))
+    const isAuthentic = isUserAuthentic(getHeaderValue(event.headers, AUTHORIZATION))
+    if (isAuthentic) {
+      getSecretTokenKey()
+      callback(null, buildResponse('OK'))
+    }
     else callback(null, buildResponse( `Invalid username / password combination`, 401, {...HEADERS, ...AUTHENTICATE_HEADER}))
   }
 }
