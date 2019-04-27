@@ -1,5 +1,5 @@
 import { Handler, Context, Callback } from "aws-lambda";
-import { JWK } from '@panva/jose'
+import * as jwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
 import * as crypto from 'crypto'
 
@@ -13,15 +13,12 @@ export const handler: Handler = ( event: Event, context: Context, callback: Call
   }
 };
 
-const getSecretTokenKey = () => {
-  const newKey = JWK.generate("EC")
-  console.log('key', newKey)
-}
-
 const decodeAuthHeader = (authHeaderValue) => Buffer.from(authHeaderValue.slice(6), 'base64').toString()
 /** decodeAuthHeader expects a string of the form `Basic someBase64String==` and returns its plaintext decode */
 const parseAuthHeader = (plainText:string, colonIndex?:number):{user:string, password:string} => colonIndex === undefined? parseAuthHeader(plainText, plainText.indexOf(':')) : ({user:plainText.slice(0,colonIndex),password:plainText.slice(colonIndex+1)}) 
 /** parseAuthHeader expects a string of the form `user:password` and returns an object of the form {user, password} */
+const extractUser = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader].reduce((acc,func) =>func(acc), authHeaderValue)['user']
+/** extractUser expects a string of the form `Basic someBase64String==` and returns the user name */
 const authenticateUser = ({ user, password }): boolean => user === "abc" && hash(password) === process.env.ABC_USER_HASHED_PASSWORD; 
 /** authenticateUser expects an object {user, password} and returns true if the user exists and the password matches the user */
 const isUserAuthentic = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader, authenticateUser].reduce((acc,func) => func(acc), authHeaderValue)
@@ -30,16 +27,21 @@ const isUserAuthentic = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader,
 const handleGet = (event:Event, callback:Callback) => {
   const AUTHORIZATION = 'Authorization'
 
+  // TODO: hasBasicAuth will false positive *any* header, not just those with 'Basic'
   const hasBasicAuth = hasHeader(event.headers, AUTHORIZATION)
 
   if (!hasBasicAuth) callback(null, buildResponse( `Unauthenticated`, 401, {...HEADERS, ...AUTHENTICATE_HEADER}))
   else {
-    const isAuthentic = isUserAuthentic(getHeaderValue(event.headers, AUTHORIZATION))
+    const authHeaderValue = getHeaderValue(event.headers, AUTHORIZATION)
+    const isAuthentic = isUserAuthentic(authHeaderValue)
+
+    /* test user/pass is 'abc/123' */
     if (isAuthentic) {
-      getSecretTokenKey()
-      callback(null, buildResponse('OK'))
+      const user = extractUser(authHeaderValue)
+      const token = jwt.sign({user:user}, process.env.JWT_SECRET)
+      callback(null, buildResponse(token))
     }
-    else callback(null, buildResponse( `Invalid username / password combination`, 401, {...HEADERS, ...AUTHENTICATE_HEADER}))
+    else callback(null, buildResponse( `Invalid username / password combination`, 403, {...HEADERS, ...AUTHENTICATE_HEADER}))
   }
 }
 
@@ -53,7 +55,7 @@ const HEADERS = {
   "Access-Control-Allow-Methods": "GET",
 };
 
-const AUTHENTICATE_HEADER = { "WWW-Authenticate":'Basic realm="foo", charset="UTF-8"' }
+const AUTHENTICATE_HEADER = { "WWW-Authenticate":'Basic realm="Access to restricted content", charset="UTF-8"' }
 
 const hash = (password:string) => crypto.createHmac('sha256', process.env.HASH_KEY).update(password).digest('hex');
 
