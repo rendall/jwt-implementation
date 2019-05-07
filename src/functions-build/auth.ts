@@ -22,8 +22,8 @@ export const parseAuthHeader = (plainText:string, colonIndex?:number):{user:stri
 /** parseAuthHeader expects a string of the form `user:password` and returns an object of the form {user, password} */
 export const extractUser = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader].reduce((acc,func) =>func(acc), authHeaderValue)['user']
 /** extractUser expects a string of the form `Basic someBase64String==` and returns the user name */
-const authenticateUser = ({ user, password }): boolean => user === "abc" && hash(password) === process.env.ABC_USER_HASHED_PASSWORD; 
-/** authenticateUser expects an object {user, password} and returns true if the user exists and the password matches the user. In this case, the only valid user is 'abc' with password '123' */
+const authenticateUser = ({ user, password }): boolean => user === process.env.TEST_USER_NAME && hash(password) === process.env.TEST_USER_HASHED_PASSWORD; 
+/** authenticateUser expects an object {user, password} and returns true if the user exists and the password matches the user. */
 export const isUserAuthentic = (authHeaderValue) => [decodeAuthHeader, parseAuthHeader, authenticateUser].reduce((acc,func) => func(acc), authHeaderValue)
 /** isUserAuthentic expects authHeaderValue and returns true if the user exists and the password matches the user */
 
@@ -36,7 +36,6 @@ const handleGet = (event:Event, callback:Callback) => {
     const authHeaderValue = getHeaderValue(event.headers, AUTHORIZATION)
     const isAuthentic = isUserAuthentic(authHeaderValue)
 
-    /* test user/pass is 'abc/123' */
     if (isAuthentic) {
       const user = extractUser(authHeaderValue)
       const token = jwt.sign({user:user}, process.env.JWT_SECRET)

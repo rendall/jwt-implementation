@@ -4,10 +4,10 @@ import {
   extractUser,
   isUserAuthentic
 } from "./auth";
-
+import * as dotenv from 'dotenv'
 import * as http from "http";
-import { rejects } from "assert";
-// Jest 'async is complete' function
+
+dotenv.config() 
 
 const AUTH_ENDPOINT = "http://localhost:9000/.netlify/functions/auth";
 const alphaNums =
@@ -44,8 +44,8 @@ describe("auth unit tests", () => {
     expect(passwordIn).toBe(password);
   });
   test("authenticate test user", () => {
-    const user = "abc";
-    const password = "123";
+    const user = process.env.TEST_USER_NAME;
+    const password = process.env.TEST_USER_PASSWORD;
     const encode = `${user}:${password}`;
     const b64encode = Buffer.from(encode).toString("base64");
     const authHeaderValue = `Basic ${b64encode}`;
@@ -103,14 +103,13 @@ describe("auth API endpoint", () => {
   test("auth endpoint without Authorization returns 401", done =>
     getAuth().then(response => {
       expect(response.statusCode).toBe(401);
-      expect(true).toBe(true);
       done();
     }));
 
   test("auth endpoint with correct Authorization returns 200", done =>
-    sendAuth("abc", "123").then(resp => {
+    sendAuth(process.env.TEST_USER_NAME, process.env.TEST_USER_PASSWORD).then(resp => {
       expect(resp.statusCode).toBe(200);
-      done();
+      resp.on('data', () => { done(); });
     }));
 
   test("auth endpoint with incorrect Authorization returns 403", done =>
