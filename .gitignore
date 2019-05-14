@@ -1,4 +1,4 @@
-./functions-build/**/*
+./functions-build
 node_modules
 *.js
 yarn-error.log

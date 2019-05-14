@@ -8,6 +8,7 @@
     "jsonwebtoken": "^8.5.1"
   },
   "scripts": {
+    "prebuild": "rimraf ./functions-build",
     "build": "tsc && netlify-lambda build ./functions-build",
     "serve": "tsc && netlify-lambda serve ./functions-build",
     "test": "jest"
@@ -19,7 +20,8 @@
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^11.13.7",
     "jest": "^24.7.1",
-    "typescript": "^3.4.5",
-    "netlify-lambda": "^1.4.5"
+    "netlify-lambda": "^1.4.5",
+    "rimraf": "^2.6.3",
+    "typescript": "^3.4.5"
   }
 }
