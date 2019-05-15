@@ -20,14 +20,17 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
   }
 
   XFetch(AUTH_ENDPOINT, authReqInfo)
-    .then(tap("Response received"))
+    .then(response => {
+      if (response.status !== 200)
+        throw `${response.status}:${response.statusText}`;
+      else return response;
+    })
     .then(
       response => response.text(),
       (error: Error | string) => console.error(error)
     )
-    .then(tap( "token found" ))
+    .then(tap("token:"))
     .then(token => {
-      console.log(`token is ${ token }`);
       const verifyReqInfo = {
         credentials: credentials,
         headers: {
@@ -36,12 +39,14 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
       };
 
       XFetch(VERIFY_ENDPOINT, verifyReqInfo)
-      .then(tap("receiving verification"))
-      .then(
-        response => response.text(),
-        (error: Error | string) => console.error(error)
-      ).then(text => console.log("verified claims", text))
-    }).catch( reason => console.error(formatReason(reason)));
+        .then(tap("receiving verification"))
+        .then(
+          response => response.text(),
+          (error: Error | string) => console.error(error)
+        )
+        .then(text => console.log("verified claims", text));
+    })
+    .catch(reason => console.error(formatReason(reason)));
 })
 
 /** Fetch with timeout */
