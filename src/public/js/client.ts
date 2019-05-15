@@ -31,8 +31,8 @@ const onBasicSubmit = (event: Event) => {
       else return text;
     })
     .then(token => {
-      const input: HTMLInputElement = document.querySelector(
-        "input[name=token]"
+      const input: HTMLTextAreaElement = document.querySelector(
+        "textarea[name=token]"
       );
       input.value = token;
       displayStatus("The auth API returns a token")
@@ -52,8 +52,8 @@ const onBearerSubmit = (event: Event) => {
   displayStatus("")
 
   const token = (document.querySelector(
-    "input[name=token]"
-  ) as HTMLInputElement).value;
+    "textarea[name=token]"
+  ) as HTMLTextAreaElement).value;
 
   const verifyReqInfo = {
     credentials: credentials,
