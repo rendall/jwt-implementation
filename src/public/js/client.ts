@@ -20,13 +20,12 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
   }
 
   XFetch(AUTH_ENDPOINT, authReqInfo)
-    .then(response => {
-      if (response.status !== 200)
-        throw `${response.status}:${response.statusText}`;
-      else return response;
-    })
     .then(
-      response => response.text()
+      response => { 
+        const body = response.text() 
+        if (response.status !== 200) throw `${response.status}:${body}`;
+        else return body;
+      }
     )
     .then(token => {
       const verifyReqInfo = {
