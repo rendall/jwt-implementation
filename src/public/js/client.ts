@@ -20,7 +20,7 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
   }
 
   XFetch(AUTH_ENDPOINT, authReqInfo)
-    .then( response => ({ status:response.status, text:response.text }))
+    .then( response => response.text().then(text => ({ status:response.status, text:text })))
     .then(
       ({status, text}) => { 
         if (status !== 200) throw `${status}:${text}`;
