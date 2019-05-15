@@ -20,12 +20,14 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
   }
 
   XFetch(AUTH_ENDPOINT, authReqInfo)
+    .then(tap("Response received"))
     .then(
       response => response.text(),
       (error: Error | string) => console.error(error)
     )
+    .then(tap( "token found" ))
     .then(token => {
-      console.log(token);
+      console.log(`token is ${ token }`);
       const verifyReqInfo = {
         credentials: credentials,
         headers: {
@@ -33,10 +35,12 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
         }
       };
 
-      XFetch(VERIFY_ENDPOINT, verifyReqInfo).then(
-        response => { console.log("verify response"); return response.text() },
+      XFetch(VERIFY_ENDPOINT, verifyReqInfo)
+      .then(tap("receiving verification"))
+      .then(
+        response => response.text(),
         (error: Error | string) => console.error(error)
-      ).then(text => console.log("verify response text:", text))
+      ).then(text => console.log("verified claims", text))
     });
 })
 
@@ -67,3 +71,8 @@ interface XRequestInit extends RequestInit {
 
 const formatReason = (error: Error | string) =>
   typeof error === "string" ? error : `${error.name}:${error.message}`;
+
+const tap = message => arg => {
+  console.log(message, arg)
+  return arg
+}
