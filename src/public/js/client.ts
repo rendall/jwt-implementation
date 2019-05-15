@@ -1,4 +1,5 @@
 const AUTH_ENDPOINT = "/.netlify/functions/auth"
+const VERIFY_ENDPOINT = "/.netlify/functions/verify"
 document.querySelector("form").addEventListener("submit", (submitEvent:Event) => submitEvent.preventDefault())
 document.querySelector("#userSubmitButton").addEventListener("click", (event:Event) => {
   event.preventDefault()
@@ -11,20 +12,32 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
 
   const credentials:RequestCredentials = 'include'
 
-  const reqInfo = {
+  const authReqInfo = {
     credentials:credentials,
     headers: {
       Authorization: `Basic ${basicCred}`
     }
   }
 
-  XFetch(AUTH_ENDPOINT, reqInfo)
-      .then(
-        response => response.json(),
+  XFetch(AUTH_ENDPOINT, authReqInfo)
+    .then(
+      response => response.text(),
+      (error: Error | string) => console.error(error)
+    )
+    .then(token => {
+      console.log(token);
+      const verifyReqInfo = {
+        credentials: credentials,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      XFetch(VERIFY_ENDPOINT, verifyReqInfo).then(
+        response => { console.log("verify response"); return response.text() },
         (error: Error | string) => console.error(error)
-      )
-      .then(json => console.log(json)
-      );
+      ).then(text => console.log("verify response text:", text))
+    });
 })
 
 /** Fetch with timeout */
@@ -51,3 +64,6 @@ interface XRequestInit extends RequestInit {
   timeout?:number,
   controller?:AbortController
 }
+
+const formatReason = (error: Error | string) =>
+  typeof error === "string" ? error : `${error.name}:${error.message}`;
