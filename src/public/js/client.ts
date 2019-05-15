@@ -41,7 +41,7 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
         response => response.text(),
         (error: Error | string) => console.error(error)
       ).then(text => console.log("verified claims", text))
-    });
+    }).catch( reason => console.error(formatReason(reason)));
 })
 
 /** Fetch with timeout */
