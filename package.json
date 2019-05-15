@@ -11,6 +11,7 @@
     "prebuild": "rimraf ./functions-build",
     "build": "tsc && netlify-lambda build ./functions-build",
     "serve": "tsc && netlify-lambda serve ./functions-build",
+    "serve:development": "http-server",
     "test": "jest"
   },
   "devDependencies": {
@@ -19,6 +20,7 @@
     "@types/jest": "^24.0.11",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/node": "^11.13.7",
+    "http-server": "^0.11.1",
     "jest": "^24.7.1",
     "netlify-lambda": "^1.4.5",
     "rimraf": "^2.6.3",
