@@ -87,4 +87,4 @@ const AUTHENTICATE_HEADER = { "WWW-Authenticate":`Basic realm="${REALM}", charse
 
 const hash = (password:string) => crypto.createHmac('sha256', process.env.HASH_KEY).update(password).digest('hex')
 
-export const buildResponse = ( message: string, statusCode: number = 200, headers = HEADERS) => ({ statusCode, headers, body: JSON.stringify({ message }) })
+export const buildResponse = ( message: string, statusCode: number = 200, headers = HEADERS) => ({ statusCode, headers, body: JSON.stringify(message) })
