@@ -26,10 +26,8 @@ document.querySelector("#userSubmitButton").addEventListener("click", (event:Eve
       else return response;
     })
     .then(
-      response => response.text(),
-      (error: Error | string) => console.error(error)
+      response => response.text()
     )
-    .then(tap("token:"))
     .then(token => {
       const verifyReqInfo = {
         credentials: credentials,
